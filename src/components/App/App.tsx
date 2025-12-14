@@ -2,7 +2,7 @@ import { useState } from 'react';
 import css from './App.module.css';
 import toast, { Toaster } from 'react-hot-toast';
 import ReactPaginate from 'react-paginate';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 
 import SearchBar from '../SearchBar/SearchBar';
 import { fetchMovies } from '../../services/movieService';
@@ -21,6 +21,7 @@ export default function App() {
         queryKey: ['movies', movie, page],
         queryFn: () => fetchMovies(movie, page),
         enabled: movie != '',
+        placeholderData: keepPreviousData,
     });
 
     const totalPages = data?.total_pages ?? 0;
