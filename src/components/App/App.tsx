@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import css from './App.module.css';
 import toast, { Toaster } from 'react-hot-toast';
 import ReactPaginate from 'react-paginate';
@@ -20,25 +20,25 @@ export default function App() {
     const { data, isLoading, isError, isSuccess } = useQuery({
         queryKey: ['movies', movie, page],
         queryFn: () => fetchMovies(movie, page),
-        enabled: movie != '',
+        enabled: movie !== '',
         placeholderData: keepPreviousData,
     });
 
     const totalPages = data?.total_pages ?? 0;
+
+    useEffect(() => {
+        if (isSuccess && data && data.results.length === 0) {
+            toast.error('No movies found for your request.');
+        }
+    }, [isSuccess, data]);
     
-    const handleSubmit = async (query: string) => {
+    const handleSubmit = (query: string) => {
         setMovie(query);
         setPage(1);
-        const data = await fetchMovies(query, page);
-        if (data.results.length === 0) {
-            toast.error('No movies found for your request.'); 
-        }
     };
 
     const handleMovieSelect = (movie: Movie) => {
-        if (movie) {
-            setSelectedMovie(movie);
-        }
+        setSelectedMovie(movie);
     };
 
     const handleCloseModal = () => {
@@ -66,7 +66,7 @@ export default function App() {
             <Toaster/>
             {isLoading && <Loader />}
             {isError && <ErrorMessage />}
-            {data &&
+            {data && data.results.length > 0 &&
                 <MovieGrid movies={data.results} onSelect={handleMovieSelect} />
             }
             {selectedMovie && (
